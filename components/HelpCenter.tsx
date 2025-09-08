@@ -248,7 +248,8 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
 
                         <section>
                             <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-300 mb-2">Powered by Google AI Studio</h3>
-                            <p>This app is proudly built and shared using <a href="https://ai.google.dev/aistudio" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">Google AI Studio</a>, a web-based toolkit for developers to prototype and build with generative AI. AI Studio enables the creation and sharing of sophisticated applications like this one, providing a user-friendly interface backed by the power of the Gemini API.</p>
+                             <p>This app is proudly built and shared using <a href="https://ai.google.dev/aistudio" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">Google AI Studio</a>, a web-based toolkit for developers to prototype and build with generative AI. AI Studio enables the creation and sharing of sophisticated applications like this one, providing a user-friendly interface backed by the power of the Gemini API.</p>
+                             <p className="mt-4">You can try the live version of this application on AI Studio: <a href="https://ai.studio/apps/drive/1W5qD7J9NrNLMOcaXG9-FS5bs9s7etgTH" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">Launch the Deconstructor App</a>.</p>
                         </section>
 
                         <section>

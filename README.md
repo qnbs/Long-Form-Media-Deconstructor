@@ -14,7 +14,7 @@ This tool acts as a cognitive partner, helping users quickly synthesize informat
 
 You can try the live version of this application directly in your browser, hosted on Google AI Studio.
 
-**[➡️ Launch the Deconstructor App on AI Studio](https://ai.studio/apps/drive/1VBLsQI0BuGruIs4RSbZ9OQppd1sJdcXh)**
+**[➡️ Launch the Deconstructor App on AI Studio](https://ai.studio/apps/drive/1W5qD7J9NrNLMOcaXG9-FS5bs9s7etgTH)**
 
 **What is AI Studio?**
 [Google AI Studio](https://ai.google.dev/aistudio) is a web-based toolkit for developers to discover, prototype, and build with Google's generative AI models. This application is a great example of an "AI Studio App," which allows developers to create and share sophisticated AI-powered tools with a user-friendly interface, backed by the power of the Gemini API.
@@ -95,7 +95,7 @@ Dieses Tool agiert als kognitiver Partner, der Nutzern hilft, Informationen schn
 
 Sie können die Live-Version dieser Anwendung direkt in Ihrem Browser ausprobieren, gehostet im Google AI Studio.
 
-**[➡️ Deconstructor-App im AI Studio starten](https://ai.studio/apps/drive/1VBLsQI0BuGruIs4RSbZ9OQppd1sJdcXh)**
+**[➡️ Deconstructor-App im AI Studio starten](https://ai.studio/apps/drive/1W5qD7J9NrNLMOcaXG9-FS5bs9s7etgTH)**
 
 **Was ist AI Studio?**
 [Google AI Studio](https://ai.google.dev/aistudio) ist ein webbasiertes Toolkit für Entwickler, um die generativen KI-Modelle von Google zu entdecken, Prototypen zu erstellen und damit zu entwickeln. Diese Anwendung ist ein hervorragendes Beispiel für eine "AI Studio App", die es Entwicklern ermöglicht, anspruchsvolle, KI-gestützte Werkzeuge mit einer benutzerfreundlichen Oberfläche zu erstellen und zu teilen, unterstützt durch die Leistungsfähigkeit der Gemini-API.
