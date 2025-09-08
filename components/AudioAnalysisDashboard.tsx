@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import type { AudioAnalysisResult } from '../types';
 import { ThemeIcon, SentimentIcon, PlayIcon, PauseIcon, ChatIcon, FactCheckIcon, TranscriptIcon } from './IconComponents';
@@ -16,15 +15,35 @@ const getYouTubeId = (url: string): string | null => {
     return (match && match[2].length === 11) ? match[2] : null;
 };
 
+const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return '00:00';
+    const date = new Date(seconds * 1000);
+    const hh = date.getUTCHours();
+    const mm = date.getUTCMinutes();
+    const ss = date.getUTCSeconds().toString().padStart(2, '0');
+    if (hh) {
+        return `${hh}:${mm.toString().padStart(2, '0')}:${ss}`;
+    }
+    return `${mm}:${ss}`;
+};
+
 interface MediaPlayerProps {
     result: AudioAnalysisResult;
     fileName: string;
     onPlayerReady: (player: any) => void;
     onTimeUpdate: (time: number) => void;
     onStateChange: (isPlaying: boolean) => void;
+    
+    // Props for custom controls
+    currentTime: number;
+    duration: number;
+    isPlaying: boolean;
+    onDurationChange: (duration: number) => void;
+    onPlayPause: () => void;
+    onSeekChange: (time: number) => void;
 }
 
-const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerReady, onTimeUpdate, onStateChange }) => {
+const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerReady, onTimeUpdate, onStateChange, currentTime, duration, isPlaying, onDurationChange, onPlayPause, onSeekChange }) => {
     const { youtubeUrl, tedTalkUrl, archiveOrgUrl, fileUrl: audioUrl } = result;
     const audioRef = useRef<HTMLAudioElement>(null);
     const videoId = useMemo(() => youtubeUrl ? getYouTubeId(youtubeUrl) : null, [youtubeUrl]);
@@ -48,10 +67,12 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerRea
         const handleTimeUpdate = () => onTimeUpdate(audio.currentTime);
         const handlePlay = () => onStateChange(true);
         const handlePause = () => onStateChange(false);
+        const handleLoadedMetadata = () => onDurationChange(audio.duration);
 
         audio.addEventListener('timeupdate', handleTimeUpdate);
         audio.addEventListener('play', handlePlay);
         audio.addEventListener('pause', handlePause);
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
         
         onPlayerReady(audio);
 
@@ -59,8 +80,9 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerRea
             audio.removeEventListener('timeupdate', handleTimeUpdate);
             audio.removeEventListener('play', handlePlay);
             audio.removeEventListener('pause', handlePause);
+            audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         };
-    }, [audioUrl, onTimeUpdate, onStateChange, onPlayerReady]);
+    }, [audioUrl, onTimeUpdate, onStateChange, onPlayerReady, onDurationChange]);
 
     // Effect for YouTube player
     useEffect(() => {
@@ -109,7 +131,28 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerRea
         return <div className="w-full aspect-video bg-black rounded-md"><iframe src={archiveOrgEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen title={fileName}></iframe></div>;
     }
     if (audioUrl) {
-        return <audio ref={audioRef} src={audioUrl} controls className="w-full" />;
+        return (
+            <div className="bg-white/10 dark:bg-slate-900/30 backdrop-blur-md p-4 rounded-lg">
+                {/* The audio element is now just for playback, not for display */}
+                <audio ref={audioRef} src={audioUrl} className="hidden" />
+                <div className="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+                    <button onClick={onPlayPause} title={isPlaying ? "Pause" : "Play"} className="text-slate-800 dark:text-slate-200">
+                         {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                    </button>
+                    <span className="text-sm font-mono flex-shrink-0">{formatTime(currentTime)}</span>
+                    <input
+                        type="range"
+                        min="0"
+                        max={duration || 1}
+                        value={currentTime}
+                        onChange={(e) => onSeekChange(Number(e.target.value))}
+                        className="w-full h-1.5 bg-slate-400/30 dark:bg-slate-600/50 rounded-lg appearance-none cursor-pointer accent-brand-primary"
+                        title="Seek audio track"
+                    />
+                    <span className="text-sm font-mono flex-shrink-0">{formatTime(duration)}</span>
+                </div>
+            </div>
+        );
     }
     return null;
 };
@@ -120,6 +163,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerRea
 const timeToSeconds = (time: string): number => {
     const parts = time.split(':').map(Number);
     if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
     return 0;
 };
 
@@ -135,6 +179,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
   const timeUpdateInterval = useRef<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const chatContext = JSON.stringify(result, null, 2);
 
@@ -201,6 +246,28 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
     }
   };
   
+   const handlePlayPause = () => {
+    const player = playerRef.current;
+    if (!player) return;
+    if (result.youtubeUrl) {
+      const state = player.getPlayerState();
+      if (state === 1) player.pauseVideo(); else player.playVideo();
+    } else if (result.fileUrl) {
+      player.paused ? player.play() : player.pause();
+    }
+  };
+
+  const handleSeekChange = (newTime: number) => {
+    const player = playerRef.current;
+    if (!player) return;
+    if (result.youtubeUrl) {
+      player.seekTo(newTime, true);
+    } else if (result.fileUrl) {
+      player.currentTime = newTime;
+    }
+    setCurrentTime(newTime);
+  };
+  
   const filteredTranscript = result.transcript.filter(entry =>
     entry.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
     entry.speaker.toLowerCase().includes(searchQuery.toLowerCase())
@@ -215,30 +282,36 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
         analysisResult={result}
       />
       
-      <div className="sticky top-4 bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-md p-4 rounded-lg shadow-lg z-10 my-8 border border-slate-300 dark:border-slate-700">
+      <div className="sticky top-24 bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-4 rounded-xl shadow-lg z-10 my-8 ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
         <MediaPlayer 
             result={result}
             fileName={fileName}
             onPlayerReady={handlePlayerReady}
             onStateChange={handleStateChange}
             onTimeUpdate={handleTimeUpdate}
+            currentTime={currentTime}
+            duration={duration}
+            isPlaying={isPlaying}
+            onDurationChange={setDuration}
+            onPlayPause={handlePlayPause}
+            onSeekChange={handleSeekChange}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <main className="lg:col-span-3 space-y-8">
-            <section className="bg-slate-200/50 dark:bg-slate-800/50 rounded-lg shadow-inner">
-                <div className="p-6 border-b-2 border-slate-300 dark:border-slate-700">
+            <section className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg rounded-xl ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
+                <div className="p-6 border-b-2 border-slate-300/20 dark:border-slate-700/50">
                     <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <TranscriptIcon />
-                        <h2 className="text-2xl font-semibold" id="transcript-heading">Interactive Transcript</h2>
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100" id="transcript-heading">Interactive Transcript</h2>
                     </div>
                      <input
                         type="text"
                         placeholder="Search transcript..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        className="w-full bg-white/20 dark:bg-slate-800/40 border border-slate-300/50 dark:border-slate-600/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary placeholder:text-slate-500 dark:placeholder:text-slate-400"
                         aria-label="Search transcript"
                     />
                 </div>
@@ -249,11 +322,12 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                         const isActive = currentTime >= entryStart && currentTime < nextEntryStart;
                         
                         return(
-                            <div key={index} className={`flex flex-col sm:flex-row gap-2 sm:gap-4 items-start p-2 rounded-md transition-colors duration-200 ${isActive ? 'bg-brand-primary/20' : ''}`}>
+                            <div key={index} className={`flex flex-col sm:flex-row gap-2 sm:gap-4 items-start p-2 rounded-md transition-colors duration-300 ${isActive ? 'bg-brand-primary/20' : ''}`}>
                                 <button 
                                     onClick={() => handleSeek(entry.timestamp)} 
-                                    className={`text-sm text-slate-500 font-mono flex-shrink-0 w-24 pt-1 text-left ${!isSeekable ? 'cursor-default' : 'hover:text-brand-primary'} transition-colors`}
+                                    className={`text-sm text-slate-500 dark:text-slate-400 font-mono flex-shrink-0 w-24 pt-1 text-left ${!isSeekable ? 'cursor-default' : 'hover:text-brand-primary'} transition-colors`}
                                     disabled={!isSeekable}
+                                    title={`Jump to ${entry.timestamp}`}
                                     aria-label={`Jump to ${entry.timestamp}`}
                                 >
                                     [{entry.timestamp}]
@@ -277,16 +351,17 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                 <section>
                      <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <ThemeIcon />
-                        <h2 className="text-2xl font-semibold">Thematic Segments</h2>
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Thematic Segments</h2>
                     </div>
                     <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
                         {result.thematicSegments.map((segment, index) => (
-                             <div key={index} className="bg-slate-200/70 dark:bg-slate-800/70 p-4 rounded-lg border border-slate-300 dark:border-slate-700">
+                             <div key={index} className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-4 rounded-lg ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
                                 <h3 className="font-bold text-slate-800 dark:text-slate-200">{segment.topic}</h3>
                                 <button 
                                     onClick={() => handleSeek(segment.timestamp_start)} 
-                                    className={`text-xs font-mono text-slate-500 mb-2 ${!isSeekable ? 'cursor-default' : 'hover:text-brand-primary'}`}
+                                    className={`text-xs font-mono text-slate-500 dark:text-slate-400 mb-2 ${!isSeekable ? 'cursor-default' : 'hover:text-brand-primary'}`}
                                     disabled={!isSeekable}
+                                    title={`Jump to start of segment: ${segment.timestamp_start}`}
                                     aria-label={`Jump to start of segment: ${segment.timestamp_start}`}
                                 >
                                     Starts at: {segment.timestamp_start}
@@ -302,9 +377,9 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                  <section>
                      <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <SentimentIcon sentiment={result.sentimentAnalysis.overallSentiment} />
-                        <h2 className="text-2xl font-semibold">Sentiment & Tone</h2>
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Sentiment & Tone</h2>
                     </div>
-                    <div className="bg-slate-200/70 dark:bg-slate-800/70 p-4 rounded-lg border border-slate-300 dark:border-slate-700">
+                    <div className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-4 rounded-lg ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
                         <p className="text-slate-700 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-slate-100">Sentiment:</span> {result.sentimentAnalysis.overallSentiment}</p>
                         <p className="text-slate-700 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-slate-100">Tone:</span> {result.sentimentAnalysis.tone}</p>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">{result.sentimentAnalysis.summary}</p>
@@ -316,7 +391,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                 <section>
                      <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <FactCheckIcon />
-                        <h2 className="text-2xl font-semibold">Fact-Checking</h2>
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Fact-Checking</h2>
                     </div>
                     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                         {result.factChecks.map((check, index) => <FactCheckCard key={index} result={check} />)}
@@ -329,7 +404,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
       <section className="mt-8">
             <div className="flex items-center gap-3 mb-4 text-brand-primary">
                 <ChatIcon />
-                <h2 className="text-2xl font-semibold">Conversational Query</h2>
+                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Conversational Query</h2>
             </div>
             <ChatInterface documentContext={chatContext} contextType="analysis" />
         </section>

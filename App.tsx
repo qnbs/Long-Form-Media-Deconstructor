@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppContext } from './components/AppContext';
 import { Header } from './components/Header';
@@ -79,6 +78,11 @@ const App: React.FC = () => {
   const [pendingTextContent, setPendingTextContent] = useState<string | null>(null);
   const [settings, setSettings] = useState<Settings>(settingsService.loadSettings());
   const [isViewingArchivedItem, setIsViewingArchivedItem] = useState(false);
+
+  // Scroll to top when view changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [session.view]);
 
   useEffect(() => {
     settingsService.applySettings(settings);
@@ -300,10 +304,10 @@ const App: React.FC = () => {
   const renderContent = () => {
     if (error) {
       return (
-        <div role="alert" className="text-center p-8 bg-red-500/10 border border-red-500/20 rounded-lg max-w-2xl mx-auto">
+        <div role="alert" className="text-center p-8 bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-red-500/30 rounded-xl max-w-2xl mx-auto ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
             <ErrorIcon />
             <h2 className="text-xl font-bold text-red-400 mt-4">Analysis Failed</h2>
-            <p className="text-slate-400 mt-2">{error}</p>
+            <p className="text-slate-600 dark:text-slate-300 mt-2">{error}</p>
             <button onClick={resetAnalysis} className="mt-6 px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-colors">Try Again</button>
         </div>
       );
@@ -337,18 +341,25 @@ const App: React.FC = () => {
 
   return (
     <AppContext.Provider value={{ settings, resetAnalysis, isViewingArchivedItem, handleBackToArchive }}>
-      <div className={`min-h-screen font-sans bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-500`}>
+      <div className={`min-h-screen text-slate-800 dark:text-slate-200`}>
         <CommandPalette />
-        <div className="container mx-auto px-4 py-8">
-          {showHeader && (
+        {showHeader && (
             <Header 
               onShowHelp={() => setSession(prev => ({...prev, view: 'help'}))} 
               onShowSettings={() => setSession(prev => ({...prev, view: 'settings'}))} 
               onShowArchive={() => setSession(prev => ({...prev, view: 'archive'}))}
               onNewAnalysis={session.view === 'archive' ? resetAnalysis : undefined}
             />
+        )}
+        <div className="container mx-auto px-4 py-16 sm:py-24 pb-32 sm:pb-24">
+           {showHeader && (
+              <div className="text-center mb-12">
+                   <p className="text-lg text-slate-600 dark:text-slate-400">
+                    An AI-powered cognitive partner for deep content intelligence.
+                  </p>
+              </div>
           )}
-          <main className={`flex flex-col items-center justify-center ${showHeader ? 'mt-12' : ''}`}>
+          <main className="flex flex-col items-center justify-center">
             {renderContent()}
           </main>
         </div>

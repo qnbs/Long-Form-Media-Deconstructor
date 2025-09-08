@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DocumentIcon, MicroscopeIcon, FeatherIcon } from './IconComponents';
 
@@ -9,18 +8,18 @@ interface TextTypeSelectorProps {
 
 export const TextTypeSelector: React.FC<TextTypeSelectorProps> = ({ onSelect, onCancel }) => {
   return (
-    <div className="w-full max-w-lg text-center bg-slate-200 dark:bg-slate-800 p-8 rounded-xl shadow-2xl animate-fade-in">
+    <div className="w-full max-w-lg text-center bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-2xl rounded-xl p-8 animate-fade-in ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
       <div className="flex justify-center items-center gap-3 mb-4">
         <DocumentIcon />
         <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Select Document Type</h2>
       </div>
-      <p className="text-slate-500 dark:text-slate-400 mb-8">
+      <p className="text-slate-600 dark:text-slate-300 mb-8">
         To provide the most accurate analysis, please specify the type of text document you've uploaded.
       </p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <button
           onClick={() => onSelect('publication')}
-          className="flex flex-col items-center justify-center w-full px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          className="flex flex-col items-center justify-center w-full px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
         >
           <MicroscopeIcon />
           <span className="mt-2">Scientific Publication</span>
@@ -28,7 +27,7 @@ export const TextTypeSelector: React.FC<TextTypeSelectorProps> = ({ onSelect, on
         </button>
         <button
           onClick={() => onSelect('narrative')}
-          className="flex flex-col items-center justify-center w-full px-6 py-4 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+          className="flex flex-col items-center justify-center w-full px-6 py-4 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
         >
             <FeatherIcon />
           <span className="mt-2">Narrative Work</span>

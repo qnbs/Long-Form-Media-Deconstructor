@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useCommandPalette } from '../hooks/useCommandPalette';
@@ -76,14 +78,14 @@ export const CommandPalette: React.FC = () => {
 
     return ReactDOM.createPortal(
         <div
-            className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center pt-24 animate-fade-in-fast"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-start justify-center pt-24 animate-fade-in-fast"
             role="dialog"
             aria-modal="true"
             aria-labelledby="command-palette-label"
         >
             <div
                 ref={paletteRef}
-                className="bg-slate-200 dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-2xl mx-4 transform transition-all"
+                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-lg shadow-2xl w-full max-w-2xl mx-4 transform transition-all ring-1 ring-inset ring-white/10 dark:ring-slate-700/50"
                 role="combobox"
                 aria-expanded="true"
                 aria-haspopup="listbox"
@@ -99,7 +101,7 @@ export const CommandPalette: React.FC = () => {
                             setSelectedIndex(0);
                         }}
                         placeholder="Type a command or search..."
-                        className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 pl-10 pr-4 py-4 focus:outline-none"
+                        className="w-full bg-transparent border-b border-slate-300/50 dark:border-slate-700/50 pl-10 pr-4 py-4 focus:outline-none placeholder:text-slate-500 dark:placeholder:text-slate-400"
                         aria-autocomplete="list"
                         aria-controls="command-list"
                         aria-activedescendant={filteredCommands[selectedIndex]?.id}
@@ -120,7 +122,7 @@ export const CommandPalette: React.FC = () => {
                                     closePalette();
                                 }}
                                 className={`flex items-center gap-4 p-3 rounded-md cursor-pointer ${
-                                    selectedIndex === index ? 'bg-brand-primary text-white' : 'hover:bg-slate-300 dark:hover:bg-slate-700'
+                                    selectedIndex === index ? 'bg-brand-primary text-white' : 'hover:bg-black/5 dark:hover:bg-white/10'
                                 }`}
                                 role="option"
                                 aria-selected={selectedIndex === index}

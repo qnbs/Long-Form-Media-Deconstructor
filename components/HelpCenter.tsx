@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 import { BackIcon, ChevronDownIcon } from './IconComponents';
 
@@ -14,8 +16,8 @@ const TabButton: React.FC<{ label: string; isActive: boolean; onClick: () => voi
 );
 
 const TutorialStep: React.FC<{ number: number; title: string; illustration: React.ReactNode; children: React.ReactNode }> = ({ number, title, illustration, children }) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-6 border-b border-slate-300 dark:border-slate-700">
-        <div className="flex flex-col items-center justify-center bg-slate-200/50 dark:bg-slate-800/50 p-6 rounded-lg h-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-6 border-b border-slate-300/20 dark:border-slate-700/50">
+        <div className="flex flex-col items-center justify-center bg-white/10 dark:bg-slate-900/20 backdrop-blur-md p-6 rounded-lg h-full ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
             {illustration}
         </div>
         <div>
@@ -30,16 +32,18 @@ const TutorialStep: React.FC<{ number: number; title: string; illustration: Reac
 const FaqItem: React.FC<{ question: string; children: React.ReactNode }> = ({ question, children }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border-b border-slate-300 dark:border-slate-700">
-            <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left py-4 px-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-md">
+        <div className="border-b border-slate-300/20 dark:border-slate-700/50">
+            <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left py-4 px-2 hover:bg-white/10 dark:hover:bg-slate-800/30 rounded-md">
                 <span className="font-semibold text-slate-800 dark:text-slate-200">{question}</span>
-                <ChevronDownIcon />
+                 <div className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}><ChevronDownIcon /></div>
             </button>
-            {isOpen && (
-                <div className="p-4 bg-slate-200/30 dark:bg-slate-800/30 text-slate-600 dark:text-slate-300 rounded-b-md animate-fade-in-fast">
-                    {children}
+             <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                <div className="overflow-hidden">
+                    <div className="p-4 bg-white/5 dark:bg-slate-900/20 text-slate-600 dark:text-slate-300 rounded-b-md">
+                        {children}
+                    </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };
@@ -53,7 +57,7 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
                 return (
                     <div className="animate-fade-in">
                         <TutorialStep number={1} title="Choose Scope & Depth" illustration={
-                             <div className="w-64 h-48 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col justify-center items-center text-slate-800 dark:text-slate-200 space-y-4">
+                             <div className="w-64 h-48 bg-white/20 dark:bg-slate-900/50 border border-white/30 dark:border-slate-700/50 rounded-lg p-4 flex flex-col justify-center items-center text-slate-800 dark:text-slate-200 space-y-4">
                                 <div className="flex bg-slate-200 dark:bg-slate-800 rounded-full p-1 w-full max-w-xs">
                                     <div className="w-1/2 bg-brand-primary text-white text-sm rounded-full py-1">Single Source</div>
                                     <div className="w-1/2 text-slate-500 dark:text-slate-400 text-sm py-1">Archival</div>
@@ -72,26 +76,26 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
                         </TutorialStep>
                         
                         <TutorialStep number={2} title="Provide Your Content" illustration={
-                             <div className="w-64 h-48 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col justify-around items-center">
-                                <div className="w-full p-4 border-2 border-dashed border-slate-400 dark:border-slate-600 rounded-xl text-center">
-                                    <p className="text-sm font-semibold">Upload File</p>
+                             <div className="w-64 h-48 bg-white/20 dark:bg-slate-900/50 border border-white/30 dark:border-slate-700/50 rounded-lg p-4 flex flex-col justify-around items-center">
+                                <div className="flex bg-slate-200 dark:bg-slate-800 rounded-lg p-1 w-full max-w-xs">
+                                    <div className="w-1/2 bg-brand-secondary text-white text-sm rounded-md py-1">Upload File</div>
+                                    <div className="w-1/2 text-slate-500 dark:text-slate-400 text-sm py-1">From URL</div>
                                 </div>
-                                <div className="w-full text-center">
-                                     <input type="text" readOnly value="https://youtube.com/..." className="bg-slate-200 dark:bg-slate-800 w-full text-xs p-2 rounded-md border border-slate-400 dark:border-slate-600" />
-                                     <p className="text-xs text-slate-500 mt-1">Or paste a URL</p>
+                                <div className="w-full p-4 border-2 border-dashed border-slate-400 dark:border-slate-600 rounded-xl text-center">
+                                    <p className="text-sm font-semibold">Drag, Paste, or Click</p>
                                 </div>
                              </div>
                         }>
                             <p>You can provide content in multiple ways:</p>
                              <ul className="list-disc list-inside ml-4">
-                                <li><strong>Upload File:</strong> Drag-and-drop or browse for text, audio, video, or image files.</li>
-                                <li><strong>From URL:</strong> Paste a URL to an article, YouTube video, TED Talk, or Internet Archive page. The app will fetch and analyze it.</li>
+                                <li><strong>Upload File:</strong> Drag-and-drop, paste, or browse for text, audio, video, or image files.</li>
+                                <li><strong>From URL:</strong> In Single Source mode, switch to the URL tab to paste a link to an article, YouTube video, TED Talk, or Internet Archive page.</li>
                             </ul>
                         </TutorialStep>
 
                         <TutorialStep number={3} title="Explore the Dashboard" illustration={
-                             <div className="w-64 h-48 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col justify-start items-center">
-                                 <div className="w-full bg-slate-200 dark:bg-slate-800 h-4 rounded-sm flex justify-end items-center px-1"><div className="w-10 h-2 bg-slate-400 dark:bg-slate-600 rounded-sm"></div></div>
+                             <div className="w-64 h-48 bg-white/20 dark:bg-slate-900/50 border border-white/30 dark:border-slate-700/50 rounded-lg p-4 flex flex-col justify-start items-center">
+                                 <div className="w-full bg-slate-200 dark:bg-slate-800 h-4 rounded-sm flex justify-between items-center px-1"><div className="w-10 h-2 bg-slate-400 dark:bg-slate-600 rounded-sm"></div><div className="w-16 h-2 bg-brand-primary rounded-sm"></div></div>
                                  <div className="w-full flex gap-2 mt-2">
                                      <div className="w-1/3 h-20 bg-slate-200 dark:bg-slate-700 rounded-md p-1 space-y-1">
                                         <div className="w-full h-2 bg-slate-400 dark:bg-slate-600 rounded-sm"></div>
@@ -106,24 +110,27 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
                         </TutorialStep>
                         
                         <TutorialStep number={4} title="Manage Your Archive" illustration={
-                             <div className="w-64 h-48 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col justify-center items-center">
+                             <div className="w-64 h-48 bg-white/20 dark:bg-slate-900/50 border border-white/30 dark:border-slate-700/50 rounded-lg p-4 flex flex-col justify-center items-center">
                                  <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-md p-2 shadow-md">
                                     <p className="font-bold text-sm">My Analysis Title</p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">Saved: 2 days ago</p>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                        <p>- [x] Review key findings</p>
+                                        <p>- [ ] Draft summary</p>
+                                    </div>
                                  </div>
                                  <p className="text-xs text-slate-500 mt-4">Every analysis is automatically saved.</p>
                              </div>
                         }>
                             <p>Every analysis you run is automatically saved to the **Analysis Archive**.</p>
                              <ul className="list-disc list-inside ml-4">
-                                 <li>Access it via the archive icon in the header.</li>
+                                 <li>Access it via the archive icon in the header or Command Palette (`Cmd+O`).</li>
                                  <li>Search and filter your past work.</li>
-                                 <li>Click "Edit" to give your analysis a custom title and add notes in Markdown.</li>
+                                 <li>Click "Edit" to give your analysis a custom title and add notes using Markdown, including task lists (`- [ ] Task`).</li>
                              </ul>
                         </TutorialStep>
                         
                          <TutorialStep number={5} title="Use Power Tools" illustration={
-                             <div className="w-64 h-48 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col justify-center items-center text-slate-800 dark:text-slate-200">
+                             <div className="w-64 h-48 bg-white/20 dark:bg-slate-900/50 border border-white/30 dark:border-slate-700/50 rounded-lg p-4 flex flex-col justify-center items-center text-slate-800 dark:text-slate-200">
                                 <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-md p-2 shadow-md text-center">
                                     <p className="text-sm font-semibold">Command Palette</p>
                                     <p className="text-xs text-slate-500">Cmd/Ctrl + K</p>
@@ -138,7 +145,7 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
                         </TutorialStep>
                         
                          <TutorialStep number={6} title="Sync & Backup" illustration={
-                             <div className="w-64 h-48 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col justify-center items-center text-slate-800 dark:text-slate-200">
+                             <div className="w-64 h-48 bg-white/20 dark:bg-slate-900/50 border border-white/30 dark:border-slate-700/50 rounded-lg p-4 flex flex-col justify-center items-center text-slate-800 dark:text-slate-200">
                                  <div className="w-full flex gap-2">
                                      <button className="w-1/2 bg-sky-600 text-white text-xs rounded-md p-2">Export Data</button>
                                      <button className="w-1/2 bg-emerald-600 text-white text-xs rounded-md p-2">Import Data</button>
@@ -178,7 +185,15 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
                                  <li>**Browser Settings:** Your browser might be configured to clear site data automatically on exit.</li>
                                  <li>**Manual Clearing:** Manually clearing your browser's cache or site data will remove the archive.</li>
                             </ul>
-                             <p className="mt-2">**Solution:** To prevent data loss, use the **Sync & Backup** feature in Settings to export your archive to a file you can save externally.</p>
+                             <p className="mt-2">**Solution:** To prevent data loss, regularly use the **Sync & Backup** feature in Settings to export your archive to a file you can save externally.</p>
+                        </FaqItem>
+                         <FaqItem question="The AI's analysis seems incorrect or incomplete.">
+                            <p>Generative AI is a powerful tool, but it's not perfect. Results can sometimes contain inaccuracies or miss nuances.</p>
+                             <ul className="list-disc list-inside ml-4 mt-2">
+                                <li>**Use Standard Mode:** 'Standard' mode uses a more complex process and is generally more accurate than 'Express' mode.</li>
+                                 <li>**Consult Source Material:** Always treat the AI analysis as a first-pass guide and refer back to the original content for critical details.</li>
+                                 <li>**Refine Chat Queries:** If the AI chat isn't giving you the answer you want, try rephrasing your question to be more specific.</li>
+                            </ul>
                         </FaqItem>
                     </div>
                 );
@@ -202,33 +217,37 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
                             <p>This feature, found in the Settings page, gives you full control over your data. 'Export All Data' bundles your entire archive, notes, and personal settings into a single JSON file that you can download. 'Import from Backup' allows you to select one of these files to completely restore your workspace on a different browser or computer. **Warning:** Importing will overwrite any existing data in the browser.</p>
                         </FaqItem>
                          <FaqItem question="Is my data private and secure?">
-                            <p>Your data is processed securely. Files are sent directly to the Google Gemini API for analysis and are not stored on any intermediate servers. The **Analysis Archive**, **Notes**, and **Settings** are saved locally to your browser's storage and this data is never transmitted anywhere.</p>
+                            <p>Your privacy is a priority. Here's how your data is handled:</p>
+                             <ul className="list-disc list-inside ml-4 mt-2">
+                                <li>Uploaded files are sent directly to the secure Google Gemini API for processing and are handled according to Google's privacy policy. They are not stored on any intermediate servers.</li>
+                                <li>The **Analysis Archive**, **Notes**, and **Settings** are saved **locally** to your browser's storage only. This data is never transmitted anywhere and remains on your device.</li>
+                             </ul>
                         </FaqItem>
                     </div>
                 );
             case 'glossary':
                 return (
                     <div className="animate-fade-in space-y-6">
-                        <dl className="space-y-6">
-                            <div>
-                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">Analysis Archive</dt>
-                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400 dark:border-slate-600">The persistent, local storage in your browser where every completed analysis is automatically saved. It provides full CRUD (Create, Read, Update, Delete) capabilities for managing your work.</dd>
-                            </div>
-                            <div>
-                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">Command Palette</dt>
-                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400 dark:border-slate-600">A searchable menu (`Cmd/Ctrl + K`) that provides quick, keyboard-driven access to all major application functions like "New Analysis", "Export", or "Settings".</dd>
-                            </div>
-                            <div>
-                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">High Contrast Mode</dt>
-                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400 dark:border-slate-600">An accessibility feature in Settings that switches the app to a theme with higher color contrast to improve readability for users with visual impairments.</dd>
+                        <dl className="space-y-6 text-slate-800 dark:text-slate-200">
+                             <div>
+                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">CORS (Cross-Origin Resource Sharing)</dt>
+                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400/50 dark:border-slate-600/50">A browser security feature that restricts web pages from making requests to a different domain than the one that served the page. This is why the URL analysis feature may not work on all websites.</dd>
                             </div>
                              <div>
+                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">Diarization (Speaker Diarization)</dt>
+                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400/50 dark:border-slate-600/50">The process of partitioning an audio stream into segments according to speaker identity. It answers the question "who spoke when?" and is used to generate the interactive transcript.</dd>
+                            </div>
+                            <div>
                                 <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">Knowledge Graph</dt>
-                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400 dark:border-slate-600">A visual, node-based representation of the relationships between entities in an archive. It helps to quickly see which entities are connected and co-occur in documents.</dd>
+                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400/50 dark:border-slate-600/50">A visual, node-based representation of the relationships between entities in an archive. It helps to quickly see which people, places, and organizations are connected and co-occur in documents.</dd>
                             </div>
                              <div>
-                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">Speaker Diarization</dt>
-                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400 dark:border-slate-600">The process of identifying and labeling different speakers in an audio or video file. This is used to generate the interactive transcript where each line is assigned to "Speaker A", "Speaker B", etc.</dd>
+                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">Markdown</dt>
+                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400/50 dark:border-slate-600/50">A lightweight markup language for creating formatted text. It's supported in the Archive notes, allowing for headers, lists, bold text, and task lists (e.g., `- [ ] My Task`).</dd>
+                            </div>
+                             <div>
+                                <dt className="text-lg font-semibold text-sky-600 dark:text-sky-300">Multimodal AI</dt>
+                                <dd className="mt-1 text-slate-600 dark:text-slate-300 pl-4 border-l-2 border-slate-400/50 dark:border-slate-600/50">An AI model, like Gemini, that can understand and process information from multiple types of data (modalities) simultaneously, such as text, images, audio, and video.</dd>
                             </div>
                         </dl>
                     </div>
@@ -275,8 +294,8 @@ export const HelpCenter: React.FC<HelpCenterProps> = ({ onBack }) => {
                     <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Help Center</h1>
                 </div>
             </header>
-            <div className="bg-slate-200/50 dark:bg-slate-800/50 rounded-lg p-4 sm:p-6 lg:p-8 shadow-inner">
-                <nav className="border-b border-slate-300 dark:border-slate-700 mb-6">
+            <div className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg rounded-xl p-4 sm:p-6 lg:p-8 ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
+                <nav className="border-b border-slate-300/20 dark:border-slate-700/50 mb-6">
                     <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                         <TabButton label="Step-by-Step Tutorial" isActive={activeTab === 'tutorial'} onClick={() => setActiveTab('tutorial')} />
                          <TabButton label="Troubleshooting" isActive={activeTab === 'troubleshooting'} onClick={() => setActiveTab('troubleshooting')} />

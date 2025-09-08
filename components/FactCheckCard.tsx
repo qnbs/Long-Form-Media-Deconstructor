@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 import type { FactCheckResult } from '../types';
 import { LinkIcon } from './IconComponents';
@@ -8,9 +10,9 @@ interface FactCheckCardProps {
 
 export const FactCheckCard: React.FC<FactCheckCardProps> = ({ result }) => {
   return (
-    <div className="bg-slate-200/70 dark:bg-slate-800/70 p-4 rounded-lg border border-slate-300 dark:border-slate-700">
+    <div className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-4 rounded-lg ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
       <blockquote className="border-l-4 border-amber-400 pl-4 mb-4">
-        <p className="font-semibold text-slate-800 dark:text-slate-200">Claim: "{result.claim}"</p>
+        <p className="font-semibold text-slate-800 dark:text-slate-100">Claim: "{result.claim}"</p>
       </blockquote>
       
       <div className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap mb-4">

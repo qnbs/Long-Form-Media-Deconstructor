@@ -13,7 +13,9 @@
     "react-dom": "^19.1.1",
     "@google/genai": "^1.15.0",
     "react-force-graph-2d": "^1.27.3",
-    "three": "^0.168.0"
+    "three": "^0.168.0",
+    "marked": "^13.0.2",
+    "highlight.js": "^11.10.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

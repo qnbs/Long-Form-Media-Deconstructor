@@ -7,15 +7,41 @@
     <title>Long-Form Media Deconstructor</title>
     <meta name="description" content="An AI-powered app to analyze and deconstruct long-form media (text, audio, video, archives) into structured, queryable knowledge." />
     <meta name="theme-color" content="#0f172a" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
             colors: {
               'brand-primary': 'rgb(var(--color-brand-primary) / <alpha-value>)',
               'brand-secondary': 'rgb(var(--color-brand-secondary) / <alpha-value>)',
+            },
+            keyframes: {
+              'fade-in': {
+                  '0%': { opacity: '0', transform: 'translateY(10px)' },
+                  '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              'fade-in-fast': {
+                  '0%': { opacity: '0' },
+                  '100%': { opacity: '1' },
+              },
+              'subtle-glow': {
+                '0%, 100%': { boxShadow: '0 0 20px -5px rgba(var(--color-brand-primary), 0)' },
+                '50%': { boxShadow: '0 0 20px -5px rgba(var(--color-brand-primary), 0.3)' }
+              }
+            },
+            animation: {
+              'fade-in': 'fade-in 0.5s ease-out forwards',
+              'fade-in-fast': 'fade-in-fast 0.3s ease-out forwards',
+              'subtle-glow': 'subtle-glow 2s ease-in-out infinite alternate',
             }
           }
         }
@@ -24,10 +50,26 @@
     <style>
       :root {
         --base-font-size: 16px; /* Default font size */
+        --color-bg-light: #f8fafc; /* slate-50 */
+        --color-bg-dark: #0f172a; /* slate-900 */
+        --grad-1-light: hsl(212, 96%, 80%, 0.2);
+        --grad-2-light: hsl(289, 96%, 80%, 0.2);
+        --grad-1-dark: hsl(212, 96%, 26%, 0.15);
+        --grad-2-dark: hsl(289, 96%, 26%, 0.15);
       }
       html {
         font-size: var(--base-font-size);
       }
+      body {
+        transition: background-color 0.5s ease, color 0.5s ease;
+        background-color: var(--color-bg-dark);
+        background-image: radial-gradient(at 15% 85%, var(--grad-1-dark) 0px, transparent 50%), radial-gradient(at 85% 15%, var(--grad-2-dark) 0px, transparent 50%);
+      }
+      html:not(.dark) body {
+        background-color: var(--color-bg-light);
+        background-image: radial-gradient(at 15% 85%, var(--grad-1-light) 0px, transparent 50%), radial-gradient(at 85% 15%, var(--grad-2-light) 0px, transparent 50%);
+      }
+
       /* For improved keyboard navigation focus */
       *:focus-visible {
         outline: 2px solid rgb(var(--color-brand-primary)) !important;
@@ -49,6 +91,7 @@
       }
       .high-contrast body {
         background-color: var(--color-bg) !important;
+        background-image: none !important;
         color: var(--color-text) !important;
       }
       .high-contrast h1, .high-contrast h2, .high-contrast h3, .high-contrast p, .high-contrast span, .high-contrast div, .high-contrast li, .high-contrast dt, .high-contrast dd {
@@ -66,13 +109,15 @@
       .high-contrast button:hover {
         background-color: var(--color-subtle-bg) !important;
       }
-      .high-contrast [class*="bg-slate"], .high-contrast [class*="dark:bg-slate"] {
+      .high-contrast [class*="bg-slate"], .high-contrast [class*="dark:bg-slate"], .high-contrast [class*="bg-white"] {
         background-color: var(--color-subtle-bg) !important;
+        background-image: none !important;
+        backdrop-filter: none !important;
       }
       .high-contrast [class*="text-slate"] {
          color: var(--color-text) !important;
       }
-      .high-contrast [class*="border-slate"] {
+      .high-contrast [class*="border-slate"], .high-contrast [class*="border-white"] {
          border-color: var(--color-border) !important;
       }
       .high-contrast .text-brand-primary, .high-contrast .text-sky-600 {
@@ -86,6 +131,99 @@
          background-color: #00ffff !important; /* Cyan for secondary accent */
          color: var(--color-bg) !important;
       }
+      
+      /* --- Task List Styles & Animations --- */
+      .task-item {
+        position: relative;
+        padding: 2px 4px;
+        margin: -2px -4px;
+        border-radius: 4px;
+      }
+      .task-item.completed.animate-highlight {
+        animation: highlight-and-fade 0.6s ease-out;
+      }
+      @keyframes highlight-and-fade {
+        0% { background-color: rgba(var(--color-brand-primary), 0.25); }
+        100% { background-color: transparent; }
+      }
+
+      .task-item-text {
+        position: relative;
+        transition: color 0.3s ease;
+      }
+      .task-item.completed .task-item-text {
+        color: #64748b; /* slate-500 */
+      }
+      .dark .task-item.completed .task-item-text {
+        color: #475569; /* slate-600 */
+      }
+      .task-item.completed .task-item-text::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #64748b; /* slate-500 */
+        animation: strike-through 0.3s ease-out forwards;
+        transform-origin: left;
+      }
+      .dark .task-item.completed .task-item-text::after {
+          background-color: #475569; /* slate-600 */
+      }
+      @keyframes strike-through {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+      }
+      
+      .task-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid #94a3b8; /* slate-400 */
+        border-radius: 3px;
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+      }
+      .dark .task-checkbox { border-color: #475569; }
+      .task-checkbox:hover { border-color: rgb(var(--color-brand-primary)); }
+      .task-checkbox:checked {
+        background-color: rgb(var(--color-brand-primary));
+        border-color: rgb(var(--color-brand-primary));
+      }
+      .task-checkbox:checked::after {
+        content: '✔';
+        font-size: 0.8rem;
+        color: white;
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        line-height: 1;
+      }
+
+      /* --- Prose / Markdown Preview Styles --- */
+      .prose { color: #334155; }
+      .dark .prose { color: #cbd5e1; }
+      .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 { color: #1e293b; font-weight: 600; margin-bottom: 0.5em; margin-top: 1em; }
+      .dark .prose h1, .dark .prose h2, .dark .prose h3, .dark .prose h4, .dark .prose h5, .dark .prose h6 { color: #f1f5f9; }
+      .prose h1 { font-size: 1.875rem; } .prose h2 { font-size: 1.5rem; } .prose h3 { font-size: 1.25rem; }
+      .prose p { margin-bottom: 1em; line-height: 1.6; }
+      .prose a { color: rgb(var(--color-brand-primary)); text-decoration: underline; }
+      .prose strong { color: #1e293b; font-weight: 600; }
+      .dark .prose strong { color: #f1f5f9; }
+      .prose blockquote { border-left: 4px solid #e2e8f0; padding-left: 1em; margin-left: 0; font-style: italic; color: #64748b; }
+      .dark .prose blockquote { border-left-color: #475569; color: #94a3b8; }
+      .prose ul, .prose ol { padding-left: 1.5em; margin-bottom: 1em; }
+      .prose li { margin-bottom: 0.25em; }
+      .prose code { background-color: #e2e8f0; color: #1e293b; padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
+      .dark .prose code { background-color: #334155; color: #e2e8f0; }
+      .prose pre { background-color: #f1f5f9; padding: 1em; border-radius: 8px; overflow-x: auto; }
+      .dark .prose pre { background-color: #1e293b; }
+      .prose pre code { background-color: transparent; padding: 0; }
+      .prose input[type="checkbox"] { margin-right: 0.5em; }
     </style>
   <script type="importmap">
 {
@@ -96,6 +234,8 @@
     "@google/genai": "https://esm.sh/@google/genai@^1.15.0",
     "react-force-graph-2d": "https://esm.sh/react-force-graph-2d@^1.27.3",
     "three": "https://esm.sh/three@^0.168.0",
+    "marked": "https://esm.sh/marked@^13.0.2",
+    "highlight.js/": "https://esm.sh/highlight.js@^11.10.0/",
     "react-dom": "https://aistudiocdn.com/react-dom@^19.1.1"
   }
 }

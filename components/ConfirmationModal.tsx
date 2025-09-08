@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useRef } from 'react';
 
 interface ConfirmationModalProps {
@@ -52,8 +54,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ onConfirm,
 
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center animate-fade-in-fast" role="alertdialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-description">
-            <div ref={modalRef} className="bg-slate-200 dark:bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md m-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in-fast" role="alertdialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-description">
+            <div ref={modalRef} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-lg shadow-xl p-6 w-full max-w-md m-4 ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
                 <h2 id="modal-title" className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">{title}</h2>
                 <div id="modal-description" className="text-slate-600 dark:text-slate-300 mb-6">{children}</div>
                 <div className="flex justify-end gap-4">

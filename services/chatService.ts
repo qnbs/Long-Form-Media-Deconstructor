@@ -1,10 +1,5 @@
-import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
-
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+import type { Chat, GenerateContentResponse } from "@google/genai";
+import { ai } from './geminiService';
 
 let chat: Chat | null = null;
 

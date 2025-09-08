@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import type { PublicationAnalysisResult } from '../types';
-import { InteractiveArgumentMap } from './InteractiveArgumentMap';
+import { InteractiveArgumentMap } from './ArgumentMap';
 import { SummaryCard } from './SummaryCard';
 import { GlossaryList } from './GlossaryList';
 import { ChatInterface } from './ChatInterface';
@@ -32,7 +32,7 @@ const SourceTextViewer: React.FC<{ text: string; highlightedEvidence: string | n
             <p>
                 {parts.map((part, i) =>
                     part.toLowerCase() === highlightedEvidence.toLowerCase() ? (
-                        <mark key={i} className="bg-amber-400/50 text-slate-100 rounded px-1 transition-all duration-300">
+                        <mark key={i} className="bg-amber-400/50 text-slate-900 dark:text-slate-100 rounded px-1 transition-all duration-300">
                             {part}
                         </mark>
                     ) : (
@@ -44,17 +44,24 @@ const SourceTextViewer: React.FC<{ text: string; highlightedEvidence: string | n
     };
 
     return (
-        <div className="relative bg-slate-200/50 dark:bg-slate-800/50 p-6 rounded-lg shadow-inner h-full max-h-[720px] overflow-y-auto">
-             {copyNotification && <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-fade-in-fast z-20">{copyNotification}</div>}
-            <div className="flex justify-between items-center mb-4 sticky top-0 bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-sm py-2 -mt-6 -mx-6 px-6">
-                <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Original Text</h3>
-                <button onClick={handleCopy} className="p-1.5 bg-slate-300 dark:bg-slate-700 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors" aria-label="Copy original text">
-                  <CopyIcon />
-                </button>
+        <div className="relative bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg rounded-xl h-full ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
+             <div className="sticky top-0 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm py-2 -mt-6 -mx-6 px-6 z-10 rounded-t-xl border-b border-white/30 dark:border-slate-700/50">
+                <div className="flex justify-between items-center mb-0 mt-4">
+                    <div className="flex items-center gap-3 text-brand-primary">
+                        <TextContextIcon />
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Original Text</h2>
+                    </div>
+                    <button onClick={handleCopy} className="p-1.5 bg-white/20 dark:bg-slate-700/50 rounded-full text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-600/50 transition-colors" title="Copy original text" aria-label="Copy original text">
+                      <CopyIcon />
+                    </button>
+                </div>
             </div>
-            <div className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                {renderText()}
+            <div className="p-6 h-full max-h-[calc(720px-4rem)] overflow-y-auto">
+                <div className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                    {renderText()}
+                </div>
             </div>
+            {copyNotification && <div className="absolute top-4 right-4 bg-emerald-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-fade-in-fast z-20">{copyNotification}</div>}
         </div>
     );
 };
@@ -81,7 +88,7 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
         <section>
           <div className="flex items-center gap-3 mb-4 text-brand-primary">
             <SummaryIcon />
-            <h2 className="text-2xl font-semibold">Structured Summary</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Structured Summary</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <SummaryCard title="Thesis" content={result.summary.thesis} />
@@ -94,16 +101,12 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
             <section>
                 <div className="flex items-center gap-3 mb-4 text-brand-primary">
                     <GraphIcon />
-                    <h2 className="text-2xl font-semibold">Interactive Argument Map</h2>
+                    <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Interactive Argument Map</h2>
                 </div>
                 <InteractiveArgumentMap argumentMap={result.argumentMap} onHighlight={handleHighlight} />
             </section>
             
             <section>
-                <div className="flex items-center gap-3 mb-4 text-brand-primary">
-                    <TextContextIcon />
-                    <h2 className="text-2xl font-semibold">Original Text Context</h2>
-                </div>
                 <SourceTextViewer text={result.originalText} highlightedEvidence={highlightedEvidence} />
             </section>
         </div>
@@ -111,7 +114,7 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
          <section>
             <div className="flex items-center gap-3 mb-4 text-brand-primary">
                 <GlossaryIcon />
-                <h2 className="text-2xl font-semibold">Key Concepts Glossary</h2>
+                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Key Concepts Glossary</h2>
             </div>
             <GlossaryList glossary={result.glossary} />
         </section>
@@ -119,7 +122,7 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
         <section>
             <div className="flex items-center gap-3 mb-4 text-brand-primary">
                 <ChatIcon />
-                <h2 className="text-2xl font-semibold">Conversational Query</h2>
+                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Conversational Query</h2>
             </div>
             <ChatInterface documentContext={result.originalText} contextType="document" />
         </section>

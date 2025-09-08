@@ -1,13 +1,7 @@
-
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
 import type { GenerateContentResponse, Part } from "@google/genai";
+import { ai } from './geminiService';
 import type { PublicationAnalysisResult, NarrativeAnalysisResult, TranscriptEntry, FactCheckResult, GroundingChunk, ThematicSegment, SentimentAnalysis, VideoNarrativeAnalysisResult, ArchiveAnalysisResult, AnalysisMode, ImageAnalysisResult, AudioAnalysisResult } from '../types';
-
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // --- Utility Functions ---
 

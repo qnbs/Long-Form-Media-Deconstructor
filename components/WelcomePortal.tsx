@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrainCircuitIcon } from './IconComponents';
 
@@ -7,7 +8,7 @@ interface WelcomePortalProps {
 
 export const WelcomePortal: React.FC<WelcomePortalProps> = ({ onEnterApp }) => {
   return (
-    <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 bg-slate-800/30 rounded-xl shadow-2xl border border-slate-700 animate-fade-in">
+    <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 bg-white/10 dark:bg-slate-900/30 backdrop-blur-2xl border border-white/20 dark:border-slate-700/50 shadow-2xl rounded-2xl animate-fade-in">
         <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-4 mb-2">
                 <BrainCircuitIcon />
@@ -21,7 +22,7 @@ export const WelcomePortal: React.FC<WelcomePortalProps> = ({ onEnterApp }) => {
         </div>
 
         <div className="mb-12">
-            <h2 className="text-2xl font-bold text-center text-slate-200 mb-8">How It Works: A Quick Tour</h2>
+            <h2 className="text-2xl font-bold text-center text-slate-100 mb-8">How It Works: A Quick Tour</h2>
             <div className="relative pl-8 border-l-2 border-slate-700 space-y-12">
                 <div className="relative">
                      <div className="absolute -left-[41px] top-1 w-5 h-5 bg-slate-700 rounded-full border-4 border-slate-900 flex items-center justify-center font-mono text-xs text-brand-primary">1</div>

@@ -71,6 +71,22 @@ export const settingsService = {
         
         // Apply font size
         root.style.setProperty('--base-font-size', `${settings.fontSize}px`);
+
+        // Apply syntax highlighting theme
+        let themeLink = document.getElementById('hljs-theme') as HTMLLinkElement | null;
+        const themeUrl = settings.theme === 'dark'
+            ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css'
+            : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css';
+
+        if (themeLink) {
+            themeLink.href = themeUrl;
+        } else {
+            themeLink = document.createElement('link');
+            themeLink.id = 'hljs-theme';
+            themeLink.rel = 'stylesheet';
+            themeLink.href = themeUrl;
+            document.head.appendChild(themeLink);
+        }
     },
     
     getSettings(): Settings {
