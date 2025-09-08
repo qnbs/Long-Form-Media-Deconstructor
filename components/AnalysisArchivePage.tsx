@@ -221,7 +221,7 @@ export const AnalysisArchivePage: React.FC<AnalysisArchivePageProps> = ({ onView
                                 <div className="p-3 bg-black/5 dark:bg-black/20 rounded-b-lg flex justify-between items-center">
                                     <button
                                         onClick={() => onViewItem(item.id)}
-                                        title="View full analysis dashboard"
+                                        title="View the full analysis dashboard"
                                         className="px-4 py-2 text-sm bg-brand-primary hover:bg-sky-600 text-white font-semibold rounded-md shadow transition-colors"
                                     >
                                         View Dashboard

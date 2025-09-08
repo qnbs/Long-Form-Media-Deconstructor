@@ -1,5 +1,4 @@
-
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { VideoNarrativeAnalysisResult, PlotPoint } from '../types';
 import { TimelineIcon, ThemeIcon, ChatIcon, CharactersIcon, PlayIcon, PauseIcon } from './IconComponents';
 import { ChatInterface } from './ChatInterface';
@@ -40,6 +39,33 @@ export const VideoNarrativeDashboard: React.FC<VideoNarrativeDashboardProps> = (
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const controlsTimeoutRef = useRef<number | null>(null);
+
+  const showControls = useCallback(() => {
+    if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+    }
+    setControlsVisible(true);
+    if (isPlaying) {
+        controlsTimeoutRef.current = window.setTimeout(() => {
+            setControlsVisible(false);
+        }, 3000);
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    showControls();
+  }, [isPlaying, showControls]);
+
+  useEffect(() => {
+    return () => {
+        if (controlsTimeoutRef.current) {
+            clearTimeout(controlsTimeoutRef.current);
+        }
+    };
+  }, []);
+
 
   const handleSeek = (time: string) => {
     if (videoRef.current) {
@@ -97,7 +123,11 @@ export const VideoNarrativeDashboard: React.FC<VideoNarrativeDashboardProps> = (
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mt-8">
             <main className="lg:col-span-3 space-y-8">
-                 <div className="sticky top-24 bg-black rounded-xl shadow-lg z-10 ring-1 ring-inset ring-slate-700/50 relative group">
+                 <div 
+                    className="sticky top-24 bg-black rounded-xl shadow-lg z-10 ring-1 ring-inset ring-slate-700/50 relative"
+                    onMouseMove={showControls}
+                    onMouseLeave={() => { if (isPlaying) setControlsVisible(false); }}
+                 >
                     <video 
                         ref={videoRef} 
                         src={result.videoUrl} 
@@ -109,7 +139,7 @@ export const VideoNarrativeDashboard: React.FC<VideoNarrativeDashboardProps> = (
                         onEnded={() => setIsPlaying(false)}
                         onClick={handlePlayPause}
                     />
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent rounded-b-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent rounded-b-md transition-opacity duration-300 ${controlsVisible ? 'opacity-100' : 'opacity-0'}`}>
                         <div className="flex items-center gap-3 text-white">
                             <button onClick={handlePlayPause} title={isPlaying ? "Pause" : "Play"}>
                                 {isPlaying ? <PauseIcon /> : <PlayIcon />}

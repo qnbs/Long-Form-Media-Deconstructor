@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState, useEffect } from 'react';
 import { 
     DocumentIcon, 
@@ -117,6 +116,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSingleFileSelect, onAr
                 className={`relative flex flex-col items-center justify-center w-full p-8 border-2 border-dashed rounded-xl transition-all duration-300 ${dragDropClasses} bg-white/10 dark:bg-slate-900/20 backdrop-blur-md`}
                 onDragEnter={handleDragEnter} onDragLeave={handleDragLeave} onDragOver={handleDragOver} onDrop={handleDrop}
                 aria-label="File upload area. Drag and drop, paste, or click to browse."
+                title="Drop a single file. If multiple files are dropped, only the first will be analyzed."
               >
                 <input type="file" id="file-upload" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept={acceptedFiles} multiple={false} aria-describedby="file-upload-desc" />
                 <div className="p-4 bg-white/20 dark:bg-slate-800/40 rounded-full mb-4"><DocumentIcon /></div>
@@ -142,6 +142,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSingleFileSelect, onAr
                         aria-label="URL to analyze"
                         aria-describedby="url-desc"
                         className="flex-grow bg-white/20 dark:bg-slate-800/40 border border-slate-400/30 dark:border-slate-600/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary text-slate-800 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                        title="Enter a URL to an article, YouTube video, TED Talk, or Internet Archive page. Note: Scraping generic articles may be blocked by the site's CORS policy."
                     />
                     <button type="submit" className="px-6 py-2 bg-brand-primary hover:bg-sky-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105" title="Start analysis of the URL">Analyze</button>
                  </form>
@@ -195,6 +196,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSingleFileSelect, onAr
               className={`relative flex flex-col items-center justify-center w-full p-8 border-2 border-dashed rounded-xl transition-all duration-300 ${dragDropClasses} bg-white/10 dark:bg-slate-900/20 backdrop-blur-md`}
               onDragEnter={handleDragEnter} onDragLeave={handleDragLeave} onDragOver={handleDragOver} onDrop={handleDrop}
               aria-label="File upload area for archive. Drag and drop, paste, or click to browse."
+              title="Drop one or more files to add them to the staged collection."
             >
               <input type="file" id="file-upload-archive" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept={acceptedFiles} multiple aria-describedby="file-upload-archive-desc"/>
               <div className="p-4 bg-white/20 dark:bg-slate-800/40 rounded-full mb-4"><ArchiveIcon /></div>

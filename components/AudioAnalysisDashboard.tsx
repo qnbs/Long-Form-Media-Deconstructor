@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import type { AudioAnalysisResult } from '../types';
 import { ThemeIcon, SentimentIcon, PlayIcon, PauseIcon, ChatIcon, FactCheckIcon, TranscriptIcon } from './IconComponents';
@@ -33,17 +32,35 @@ interface MediaPlayerProps {
     onPlayerReady: (player: any) => void;
     onTimeUpdate: (time: number) => void;
     onStateChange: (isPlaying: boolean) => void;
-    
-    // Props for custom controls
+    onDurationChange: (duration: number) => void;
     currentTime: number;
     duration: number;
     isPlaying: boolean;
-    onDurationChange: (duration: number) => void;
     onPlayPause: () => void;
     onSeekChange: (time: number) => void;
 }
 
-const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerReady, onTimeUpdate, onStateChange, currentTime, duration, isPlaying, onDurationChange, onPlayPause, onSeekChange }) => {
+const CustomControls: React.FC<Pick<MediaPlayerProps, 'isPlaying' | 'currentTime' | 'duration' | 'onPlayPause' | 'onSeekChange'>> = ({ isPlaying, currentTime, duration, onPlayPause, onSeekChange }) => (
+    <div className="flex items-center gap-4 text-slate-800 dark:text-slate-200 mt-2">
+        <button onClick={onPlayPause} title={isPlaying ? "Pause" : "Play"} className="text-slate-800 dark:text-slate-200">
+            {isPlaying ? <PauseIcon /> : <PlayIcon />}
+        </button>
+        <span className="text-sm font-mono flex-shrink-0">{formatTime(currentTime)}</span>
+        <input
+            type="range"
+            min="0"
+            max={duration || 1}
+            value={currentTime}
+            onChange={(e) => onSeekChange(Number(e.target.value))}
+            className="w-full h-1.5 bg-slate-400/30 dark:bg-slate-600/50 rounded-lg appearance-none cursor-pointer accent-brand-primary"
+            title="Seek audio track"
+        />
+        <span className="text-sm font-mono flex-shrink-0">{formatTime(duration)}</span>
+    </div>
+);
+
+
+const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerReady, onTimeUpdate, onStateChange, onDurationChange, currentTime, duration, isPlaying, onPlayPause, onSeekChange }) => {
     const { youtubeUrl, tedTalkUrl, archiveOrgUrl, fileUrl: audioUrl } = result;
     const audioRef = useRef<HTMLAudioElement>(null);
     const videoId = useMemo(() => youtubeUrl ? getYouTubeId(youtubeUrl) : null, [youtubeUrl]);
@@ -95,9 +112,12 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerRea
                     height: '100%',
                     width: '100%',
                     videoId: videoId,
-                    playerVars: { autoplay: 0, controls: 1, modestbranding: 1, rel: 0 },
+                    playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0 },
                     events: { 
-                        'onReady': () => onPlayerReady(player),
+                        'onReady': (event: any) => {
+                            onPlayerReady(event.target);
+                            onDurationChange(event.target.getDuration());
+                        },
                         'onStateChange': (event: any) => {
                             const playerState = event.data;
                             onStateChange(playerState === (window as any).YT.PlayerState.PLAYING);
@@ -119,42 +139,35 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerRea
         return () => {
             player?.destroy();
         }
-    }, [youtubeUrl, videoId, onPlayerReady, onStateChange]);
+    }, [youtubeUrl, videoId, onPlayerReady, onStateChange, onDurationChange]);
     
-    if (youtubeUrl && videoId) {
-        return <div className="w-full aspect-video bg-black rounded-md"><div id="youtube-player" className="w-full h-full" /></div>;
-    }
-    if (tedTalkEmbedUrl) {
-        return <div className="w-full aspect-video bg-black rounded-md"><iframe src={tedTalkEmbedUrl} className="w-full h-full" frameBorder="0" scrolling="no" allowFullScreen title={fileName}></iframe></div>;
-    }
-    if (archiveOrgEmbedUrl) {
-        return <div className="w-full aspect-video bg-black rounded-md"><iframe src={archiveOrgEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen title={fileName}></iframe></div>;
-    }
-    if (audioUrl) {
-        return (
-            <div className="bg-white/10 dark:bg-slate-900/30 backdrop-blur-md p-4 rounded-lg">
-                {/* The audio element is now just for playback, not for display */}
+    const showCustomControls = !!(youtubeUrl || audioUrl);
+    
+    return (
+        <div className="bg-white/10 dark:bg-slate-900/30 backdrop-blur-md p-4 rounded-lg">
+            {youtubeUrl && videoId && (
+                <div className="w-full aspect-video bg-black rounded-md"><div id="youtube-player" className="w-full h-full" /></div>
+            )}
+            {tedTalkEmbedUrl && (
+                 <div className="w-full aspect-video bg-black rounded-md"><iframe src={tedTalkEmbedUrl} className="w-full h-full" frameBorder="0" scrolling="no" allowFullScreen title={fileName}></iframe></div>
+            )}
+            {archiveOrgEmbedUrl && (
+                 <div className="w-full aspect-video bg-black rounded-md"><iframe src={archiveOrgEmbedUrl} className="w-full h-full" frameBorder="0" allowFullScreen title={fileName}></iframe></div>
+            )}
+            {audioUrl && (
                 <audio ref={audioRef} src={audioUrl} className="hidden" />
-                <div className="flex items-center gap-4 text-slate-800 dark:text-slate-200">
-                    <button onClick={onPlayPause} title={isPlaying ? "Pause" : "Play"} className="text-slate-800 dark:text-slate-200">
-                         {isPlaying ? <PauseIcon /> : <PlayIcon />}
-                    </button>
-                    <span className="text-sm font-mono flex-shrink-0">{formatTime(currentTime)}</span>
-                    <input
-                        type="range"
-                        min="0"
-                        max={duration || 1}
-                        value={currentTime}
-                        onChange={(e) => onSeekChange(Number(e.target.value))}
-                        className="w-full h-1.5 bg-slate-400/30 dark:bg-slate-600/50 rounded-lg appearance-none cursor-pointer accent-brand-primary"
-                        title="Seek audio track"
-                    />
-                    <span className="text-sm font-mono flex-shrink-0">{formatTime(duration)}</span>
-                </div>
-            </div>
-        );
-    }
-    return null;
+            )}
+             {showCustomControls && (
+                <CustomControls
+                    isPlaying={isPlaying}
+                    currentTime={currentTime}
+                    duration={duration}
+                    onPlayPause={onPlayPause}
+                    onSeekChange={onSeekChange}
+                />
+            )}
+        </div>
+    );
 };
 
 
@@ -221,6 +234,12 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
   const handlePlayerReady = useCallback((player: any) => {
       playerRef.current = player;
   }, []);
+  
+  const handleDurationChange = useCallback((newDuration: number) => {
+      if (!isNaN(newDuration) && newDuration > 0) {
+          setDuration(newDuration);
+      }
+  }, []);
 
   const handleStateChange = useCallback((playing: boolean) => {
       setIsPlaying(playing);
@@ -239,7 +258,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
 
     if (result.youtubeUrl) { // YouTube API
         player.seekTo(seconds, true);
-        player.playVideo();
+        if (player.getPlayerState() !== 1) player.playVideo();
     } else if (result.fileUrl) { // HTMLAudioElement
         player.currentTime = seconds;
         if (player.paused) player.play();
@@ -289,10 +308,10 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
             onPlayerReady={handlePlayerReady}
             onStateChange={handleStateChange}
             onTimeUpdate={handleTimeUpdate}
+            onDurationChange={handleDurationChange}
             currentTime={currentTime}
             duration={duration}
             isPlaying={isPlaying}
-            onDurationChange={setDuration}
             onPlayPause={handlePlayPause}
             onSeekChange={handleSeekChange}
         />
