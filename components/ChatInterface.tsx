@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { chatService } from '../services/chatService';
 import { BrainCircuitIcon, CopyIcon, XIcon } from './IconComponents';
 import { useAppContext } from './AppContext';
@@ -53,15 +52,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
+  const hideSuggestions = useCallback(() => {
+    if (showSuggestions) {
+        setShowSuggestions(false);
+    }
+  }, [showSuggestions]);
+
   const handleSendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
+    hideSuggestions();
     isGenerationStopped.current = false;
     const userMessage: Message = { sender: 'user', text: messageText };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-    setShowSuggestions(false);
 
     try {
         let aiResponseText = '';
@@ -101,6 +106,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
   };
   
   const handleSuggestionClick = (prompt: string) => {
+    hideSuggestions();
     setInput(prompt);
     handleSendMessage(prompt);
   };
@@ -136,7 +142,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
             </div>
           </div>
         ))}
-        {showSuggestions && messages.length < 2 && (
+        {showSuggestions && (
             <div className="pt-4 space-y-2 animate-fade-in">
                 <p className="text-sm text-slate-500 dark:text-slate-400 text-center">Try asking one of these:</p>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -154,7 +160,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
         <input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+              setInput(e.target.value);
+              hideSuggestions();
+          }}
           placeholder="Ask a follow-up question..."
           className="flex-grow bg-white/20 dark:bg-slate-800/40 border border-slate-300/50 dark:border-slate-600/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary placeholder:text-slate-500 dark:placeholder:text-slate-400"
           disabled={isLoading}

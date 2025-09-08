@@ -286,7 +286,7 @@ export const WebContentAgent = {
         }
 
         updateProgress('Extracting main article from HTML...');
-        const prompt = `You are an expert web content extractor. Analyze the following HTML content and extract only the main article text. Ignore all navigation bars, headers, footers, advertisements, sidebars, and other boilerplate content. Return only the clean, readable text of the article. If no main article is found, return an empty string.
+        const prompt = `You are an expert web content extractor. Your task is to extract the main article text from the provided HTML. Pay close attention to semantic tags like <article>, <main>, and common class names like 'post', 'article-body', 'content', 'story-content'. Methodically strip away all non-essential elements such as navigation bars, headers, footers, advertisements, sidebars, related-content sections, and comment sections. Return only the clean, readable text of the main article. If no main article is found, return an empty string.
         --- HTML CONTENT ---
         ${html}
         --- END HTML CONTENT ---`;
