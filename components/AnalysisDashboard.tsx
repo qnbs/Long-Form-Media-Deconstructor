@@ -49,7 +49,7 @@ const SourceTextViewer: React.FC<{ text: string; highlightedEvidence: string | n
                 <div className="flex justify-between items-center mb-0 mt-4">
                     <div className="flex items-center gap-3 text-brand-primary">
                         <TextContextIcon />
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Original Text</h2>
+                        <h2 className="text-2xl font-semibold">Original Text</h2>
                     </div>
                     <button onClick={handleCopy} className="p-1.5 bg-white/20 dark:bg-slate-700/50 rounded-full text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-600/50 transition-colors" title="Copy original text" aria-label="Copy original text">
                       <CopyIcon />
@@ -88,7 +88,7 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
         <section>
           <div className="flex items-center gap-3 mb-4 text-brand-primary">
             <SummaryIcon />
-            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Structured Summary</h2>
+            <h2 className="text-2xl font-semibold">Structured Summary</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <SummaryCard title="Thesis" content={result.summary.thesis} />
@@ -101,7 +101,7 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
             <section>
                 <div className="flex items-center gap-3 mb-4 text-brand-primary">
                     <GraphIcon />
-                    <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Interactive Argument Map</h2>
+                    <h2 className="text-2xl font-semibold">Interactive Argument Map</h2>
                 </div>
                 <InteractiveArgumentMap argumentMap={result.argumentMap} onHighlight={handleHighlight} />
             </section>
@@ -114,7 +114,7 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
          <section>
             <div className="flex items-center gap-3 mb-4 text-brand-primary">
                 <GlossaryIcon />
-                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Key Concepts Glossary</h2>
+                <h2 className="text-2xl font-semibold">Key Concepts Glossary</h2>
             </div>
             <GlossaryList glossary={result.glossary} />
         </section>
@@ -122,7 +122,7 @@ export const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ result, fi
         <section>
             <div className="flex items-center gap-3 mb-4 text-brand-primary">
                 <ChatIcon />
-                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Conversational Query</h2>
+                <h2 className="text-2xl font-semibold">Conversational Query</h2>
             </div>
             <ChatInterface documentContext={result.originalText} contextType="document" />
         </section>

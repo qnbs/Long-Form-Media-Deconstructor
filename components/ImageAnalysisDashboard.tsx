@@ -36,7 +36,7 @@ export const ImageAnalysisDashboard: React.FC<ImageAnalysisDashboardProps> = ({ 
                     <section className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg rounded-xl p-6 ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
                         <div className="flex items-center gap-3 mb-4 text-brand-primary">
                             <DescriptionIcon />
-                            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">AI Description</h2>
+                            <h2 className="text-2xl font-semibold">AI Description</h2>
                         </div>
                         <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{result.description}</p>
                     </section>
@@ -46,7 +46,7 @@ export const ImageAnalysisDashboard: React.FC<ImageAnalysisDashboardProps> = ({ 
                              <section className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg rounded-xl p-6 ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
                                 <div className="flex items-center gap-3 mb-4 text-brand-primary">
                                     <ObjectsIcon />
-                                    <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Identified Objects</h2>
+                                    <h2 className="text-xl font-semibold">Identified Objects</h2>
                                 </div>
                                 <ul className="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
                                     {result.identifiedObjects.map((obj, i) => <li key={i}>{obj}</li>)}
@@ -60,7 +60,7 @@ export const ImageAnalysisDashboard: React.FC<ImageAnalysisDashboardProps> = ({ 
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-3 text-brand-primary">
                                         <OcrIcon />
-                                        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Extracted Text</h2>
+                                        <h2 className="text-xl font-semibold">Extracted Text</h2>
                                     </div>
                                     <button onClick={() => handleCopy(result.extractedText!)} className="p-1.5 bg-white/20 dark:bg-slate-800/40 rounded-full text-slate-600 dark:text-slate-300 hover:bg-white/40 dark:hover:bg-slate-700/50 transition-colors" title="Copy extracted text" aria-label="Copy extracted text">
                                         <CopyIcon />
@@ -84,7 +84,7 @@ export const ImageAnalysisDashboard: React.FC<ImageAnalysisDashboardProps> = ({ 
             <section className="mt-8">
                 <div className="flex items-center gap-3 mb-4 text-brand-primary">
                     <ChatIcon />
-                    <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Conversational Query</h2>
+                    <h2 className="text-2xl font-semibold">Conversational Query</h2>
                 </div>
                 <ChatInterface documentContext={chatContext} contextType="analysis" />
             </section>

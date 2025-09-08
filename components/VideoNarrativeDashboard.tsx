@@ -162,7 +162,7 @@ export const VideoNarrativeDashboard: React.FC<VideoNarrativeDashboardProps> = (
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 text-brand-primary">
                         <div className="flex items-center gap-3">
                             <TimelineIcon />
-                            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Interactive Timeline</h2>
+                            <h2 className="text-2xl font-semibold">Interactive Timeline</h2>
                         </div>
                         <div className="flex items-center gap-2">
                              <label htmlFor="char-filter" className="text-sm font-medium text-slate-700 dark:text-slate-300">Filter by Character:</label>
@@ -194,7 +194,7 @@ export const VideoNarrativeDashboard: React.FC<VideoNarrativeDashboardProps> = (
                 <section>
                     <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <CharactersIcon />
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Character Arcs</h2>
+                        <h2 className="text-2xl font-semibold">Character Arcs</h2>
                     </div>
                     <div className="space-y-4 max-h-[45vh] overflow-y-auto pr-2">
                         {result.characters.map((char, index) => (
@@ -208,7 +208,7 @@ export const VideoNarrativeDashboard: React.FC<VideoNarrativeDashboardProps> = (
                  <section>
                     <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <ThemeIcon />
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Thematic Analysis</h2>
+                        <h2 className="text-2xl font-semibold">Thematic Analysis</h2>
                     </div>
                      <div className="space-y-4 max-h-[45vh] overflow-y-auto pr-2">
                         {result.themes.map((theme, index) => (
@@ -232,7 +232,7 @@ export const VideoNarrativeDashboard: React.FC<VideoNarrativeDashboardProps> = (
          <section className="mt-8">
             <div className="flex items-center gap-3 mb-4 text-brand-primary">
                 <ChatIcon />
-                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Conversational Query</h2>
+                <h2 className="text-2xl font-semibold">Conversational Query</h2>
             </div>
             <ChatInterface documentContext={chatContext} contextType="analysis" />
         </section>

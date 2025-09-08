@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { archiveService } from '../services/archiveService';
 import type { ArchivedAnalysisItem, AnalysisType } from '../types';

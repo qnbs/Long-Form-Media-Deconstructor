@@ -194,6 +194,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSingleFileSelect, onAr
       </>
     );
   };
+  
+  const hasStagedFiles = stagedFiles.length > 0;
 
   return (
     <div className="w-full max-w-3xl text-center">
@@ -242,14 +244,25 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onSingleFileSelect, onAr
             >
               <input type="file" id="file-upload-archive" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept={acceptedFileString} multiple aria-describedby="file-upload-archive-desc"/>
               <div className="p-4 bg-white/20 dark:bg-slate-800/40 rounded-full mb-4"><ArchiveIcon /></div>
-              <p className="text-xl font-semibold text-slate-800 dark:text-slate-100">Drag & drop, paste, or <label htmlFor="file-upload-archive" className="text-brand-primary font-medium cursor-pointer hover:underline">click to upload</label></p>
-              <p id="file-upload-archive-desc" className="text-slate-600 dark:text-slate-300 mt-2">Supports .txt, audio, video, and image files.</p>
+              {hasStagedFiles ? (
+                  <>
+                      <p className="text-xl font-semibold text-slate-800 dark:text-slate-100">Add more files</p>
+                      <p id="file-upload-archive-desc" className="text-slate-600 dark:text-slate-300 mt-2">
+                        You can drag & drop, paste, or <label htmlFor="file-upload-archive" className="text-brand-primary font-medium cursor-pointer hover:underline">click to upload</label> more files.
+                      </p>
+                  </>
+              ) : (
+                  <>
+                    <p className="text-xl font-semibold text-slate-800 dark:text-slate-100">Drag & drop, paste, or <label htmlFor="file-upload-archive" className="text-brand-primary font-medium cursor-pointer hover:underline">click to upload</label></p>
+                    <p id="file-upload-archive-desc" className="text-slate-600 dark:text-slate-300 mt-2">Supports .txt, audio, video, and image files.</p>
+                  </>
+              )}
               {fileError && <p role="alert" className="text-red-500 dark:text-red-400 font-semibold mt-4 text-sm bg-red-500/10 p-2 rounded-md">{fileError}</p>}
             </div>
             
             <div className="mt-8 text-left">
                 <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Staged Files ({stagedFiles.length})</h3>
-                {stagedFiles.length > 0 ? (
+                {hasStagedFiles ? (
                   <div className="space-y-3 max-h-60 overflow-y-auto bg-white/10 dark:bg-slate-900/20 backdrop-blur-sm p-4 rounded-lg">
                       {stagedFiles.map((file, index) => (
                           <div 

@@ -104,41 +104,52 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ result, fileName, onPlayerRea
     // Effect for YouTube player
     useEffect(() => {
         if (!youtubeUrl || !videoId) return;
+
         let player: any = null;
+        const playerContainerId = 'youtube-player';
 
         const createPlayer = () => {
-             if (document.getElementById('youtube-player')) {
-                 player = new (window as any).YT.Player('youtube-player', {
-                    height: '100%',
-                    width: '100%',
+            // Ensure the container exists before creating the player
+            if (document.getElementById(playerContainerId)) {
+                player = new (window as any).YT.Player(playerContainerId, {
                     videoId: videoId,
                     playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0 },
-                    events: { 
+                    events: {
                         'onReady': (event: any) => {
                             onPlayerReady(event.target);
                             onDurationChange(event.target.getDuration());
                         },
                         'onStateChange': (event: any) => {
                             const playerState = event.data;
+                            // Forward playing/paused state to the parent component
                             onStateChange(playerState === (window as any).YT.PlayerState.PLAYING);
                         }
                     }
                 });
-             }
-        }
-        
+            }
+        };
+
+        // Load the YouTube IFrame API script if it's not already loaded
         if (!(window as any).YT || !(window as any).YT.Player) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
-            document.body.appendChild(tag);
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+            
             (window as any).onYouTubeIframeAPIReady = createPlayer;
         } else {
+            // If API is already loaded, create the player directly
             createPlayer();
         }
-        
+
+        // Cleanup function to destroy the player instance when the component unmounts
         return () => {
             player?.destroy();
-        }
+             // Clean up the global callback to prevent memory leaks on re-renders
+            if ((window as any).onYouTubeIframeAPIReady) {
+                (window as any).onYouTubeIframeAPIReady = undefined;
+            }
+        };
     }, [youtubeUrl, videoId, onPlayerReady, onStateChange, onDurationChange]);
     
     const showCustomControls = !!(youtubeUrl || audioUrl);
@@ -221,7 +232,8 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
 
   const startTimeUpdater = useCallback(() => {
     stopTimeUpdater();
-    if (playerRef.current && result.youtubeUrl) { // Only needed for YouTube player
+    // For YouTube, we must poll for the current time as there's no native timeupdate event
+    if (playerRef.current && result.youtubeUrl) {
         timeUpdateInterval.current = window.setInterval(() => {
             const time = playerRef.current?.getCurrentTime();
             if (typeof time === 'number') {
@@ -243,22 +255,26 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
 
   const handleStateChange = useCallback((playing: boolean) => {
       setIsPlaying(playing);
-      if (playing) startTimeUpdater();
-      else stopTimeUpdater();
+      if (playing) {
+          startTimeUpdater();
+      } else {
+          stopTimeUpdater();
+      }
   }, [startTimeUpdater, stopTimeUpdater]);
 
   const handleTimeUpdate = useCallback((time: number) => {
+      // This is primarily for the HTMLAudioElement `timeupdate` event
       setCurrentTime(time);
   }, []);
 
   const handleSeek = (time: string) => {
     const seconds = timeToSeconds(time);
     const player = playerRef.current;
-    if (!player) return;
+    if (!player || !isSeekable) return;
 
-    if (result.youtubeUrl) { // YouTube API
+    if (result.youtubeUrl) { // YouTube Player API
         player.seekTo(seconds, true);
-        if (player.getPlayerState() !== 1) player.playVideo();
+        if (player.getPlayerState() !== 1) player.playVideo(); // Play if not already playing
     } else if (result.fileUrl) { // HTMLAudioElement
         player.currentTime = seconds;
         if (player.paused) player.play();
@@ -267,9 +283,11 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
   
    const handlePlayPause = () => {
     const player = playerRef.current;
-    if (!player) return;
+    if (!player || !isSeekable) return;
+
     if (result.youtubeUrl) {
       const state = player.getPlayerState();
+      // 1 is PLAYING, 2 is PAUSED
       if (state === 1) player.pauseVideo(); else player.playVideo();
     } else if (result.fileUrl) {
       player.paused ? player.play() : player.pause();
@@ -278,12 +296,14 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
 
   const handleSeekChange = (newTime: number) => {
     const player = playerRef.current;
-    if (!player) return;
+    if (!player || !isSeekable) return;
+
     if (result.youtubeUrl) {
       player.seekTo(newTime, true);
     } else if (result.fileUrl) {
       player.currentTime = newTime;
     }
+    // Immediately update the state for a responsive slider UI
     setCurrentTime(newTime);
   };
   
@@ -323,7 +343,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                 <div className="p-6 border-b-2 border-slate-300/20 dark:border-slate-700/50">
                     <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <TranscriptIcon />
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100" id="transcript-heading">Interactive Transcript</h2>
+                        <h2 className="text-2xl font-semibold" id="transcript-heading">Interactive Transcript</h2>
                     </div>
                      <input
                         type="text"
@@ -370,7 +390,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                 <section>
                      <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <ThemeIcon />
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Thematic Segments</h2>
+                        <h2 className="text-2xl font-semibold">Thematic Segments</h2>
                     </div>
                     <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
                         {result.thematicSegments.map((segment, index) => (
@@ -396,7 +416,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                  <section>
                      <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <SentimentIcon sentiment={result.sentimentAnalysis.overallSentiment} />
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Sentiment & Tone</h2>
+                        <h2 className="text-2xl font-semibold">Sentiment & Tone</h2>
                     </div>
                     <div className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 p-4 rounded-lg ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
                         <p className="text-slate-700 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-slate-100">Sentiment:</span> {result.sentimentAnalysis.overallSentiment}</p>
@@ -410,7 +430,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
                 <section>
                      <div className="flex items-center gap-3 mb-4 text-brand-primary">
                         <FactCheckIcon />
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Fact-Checking</h2>
+                        <h2 className="text-2xl font-semibold">Fact-Checking</h2>
                     </div>
                     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                         {result.factChecks.map((check, index) => <FactCheckCard key={index} result={check} />)}
@@ -423,7 +443,7 @@ export const AudioAnalysisDashboard: React.FC<AudioAnalysisDashboardProps> = ({ 
       <section className="mt-8">
             <div className="flex items-center gap-3 mb-4 text-brand-primary">
                 <ChatIcon />
-                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">Conversational Query</h2>
+                <h2 className="text-2xl font-semibold">Conversational Query</h2>
             </div>
             <ChatInterface documentContext={chatContext} contextType="analysis" />
         </section>

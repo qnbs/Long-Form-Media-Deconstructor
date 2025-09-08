@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { chatService } from '../services/chatService';
 import { BrainCircuitIcon, CopyIcon, XIcon } from './IconComponents';
 import { useAppContext } from './AppContext';
@@ -31,7 +31,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(settings.chatShowSuggestions);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isGenerationStopped = useRef(false);
   const [copyNotification, setCopyNotification] = useState('');
@@ -42,26 +42,26 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
         ? "Hello! Ask me any questions you have about this document."
         : "Hello! Ask me any questions you have about these analysis results.";
     setMessages([{ sender: 'ai', text: initialMessage }]);
-    setShowSuggestions(settings.chatShowSuggestions);
+    setHasInteracted(false); // Reset interaction state for new chat sessions
     return () => {
       chatService.endChat();
     };
-  }, [documentContext, contextType, settings.chatShowSuggestions]);
+  }, [documentContext, contextType]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  const hideSuggestions = useCallback(() => {
-    if (showSuggestions) {
-        setShowSuggestions(false);
+  const handleFirstInteraction = () => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
     }
-  }, [showSuggestions]);
+  };
 
   const handleSendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
-    hideSuggestions();
+    handleFirstInteraction();
     isGenerationStopped.current = false;
     const userMessage: Message = { sender: 'user', text: messageText };
     setMessages(prev => [...prev, userMessage]);
@@ -106,7 +106,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
   };
   
   const handleSuggestionClick = (prompt: string) => {
-    hideSuggestions();
+    handleFirstInteraction();
     setInput(prompt);
     handleSendMessage(prompt);
   };
@@ -120,6 +120,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
     setCopyNotification('Copied!');
     setTimeout(() => setCopyNotification(''), 2000);
   };
+
+  const shouldShowSuggestions = settings.chatShowSuggestions && !hasInteracted;
 
   return (
     <div className="bg-white/10 dark:bg-slate-900/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg rounded-xl w-full max-w-4xl mx-auto flex flex-col h-[60vh] ring-1 ring-inset ring-white/10 dark:ring-slate-700/50">
@@ -142,7 +144,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
             </div>
           </div>
         ))}
-        {showSuggestions && (
+        {shouldShowSuggestions && (
             <div className="pt-4 space-y-2 animate-fade-in">
                 <p className="text-sm text-slate-500 dark:text-slate-400 text-center">Try asking one of these:</p>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -162,7 +164,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ documentContext, c
           value={input}
           onChange={(e) => {
               setInput(e.target.value);
-              hideSuggestions();
+              handleFirstInteraction();
           }}
           placeholder="Ask a follow-up question..."
           className="flex-grow bg-white/20 dark:bg-slate-800/40 border border-slate-300/50 dark:border-slate-600/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary placeholder:text-slate-500 dark:placeholder:text-slate-400"

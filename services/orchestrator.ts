@@ -1,4 +1,5 @@
 
+
 import { TranscriptionAgent, SynthesizerAgent, FactCheckAgent, DeeperAnalysisAgent, VisualAnalysisAgent, ArchiveAgent, WebContentAgent, YoutubeAgent, TedTalkAgent, ArchiveOrgAgent } from './agents';
 import type { AnalysisResult, AnalysisMode, AudioAnalysisResult } from '../types';
 
@@ -7,12 +8,60 @@ type AnalysisPipelineResult = {
     data: AnalysisResult;
 };
 
+// --- Internal Helper for URL-based Audio Analysis ---
+
+async function _runFactCheckingAndAssembleAudioResult(
+    initialAnalysis: Pick<AudioAnalysisResult, 'transcript' | 'thematicSegments' | 'sentimentAnalysis'>,
+    url: string,
+    urlKey: 'youtubeUrl' | 'tedTalkUrl' | 'archiveOrgUrl',
+    updateProgress: (message: string) => void,
+    analysisMode: AnalysisMode,
+    currentStep: number,
+    totalSteps: number,
+): Promise<AnalysisPipelineResult> {
+    const transcriptText = initialAnalysis.transcript!.map(t => `${t.speaker}: ${t.text}`).join('\n');
+    let factChecks = [];
+
+    if (analysisMode === 'standard') {
+        updateProgress(`Step ${currentStep++}/${totalSteps}: Extracting verifiable claims from transcript...`);
+        const claims = await SynthesizerAgent.extractClaimsFromTranscript(transcriptText);
+
+        if (claims.length > 0) {
+            updateProgress(`Step ${currentStep++}/${totalSteps}: Fact-checking ${claims.length} claims...`);
+            factChecks = await FactCheckAgent.verifyClaims(claims);
+        } else {
+             updateProgress(`Step ${currentStep++}/${totalSteps}: No verifiable claims found.`);
+        }
+    } else {
+        updateProgress(`Step ${currentStep++}/${totalSteps}: Skipping fact-checking in Express mode.`);
+    }
+    
+    updateProgress(`Step ${totalSteps}/${totalSteps}: Finalizing dashboard...`);
+
+    const audioData: AudioAnalysisResult = {
+        type: 'audio',
+        transcript: initialAnalysis.transcript!,
+        thematicSegments: initialAnalysis.thematicSegments,
+        sentimentAnalysis: initialAnalysis.sentimentAnalysis,
+        factChecks: factChecks.length > 0 ? factChecks : undefined,
+    };
+    audioData[urlKey] = url;
+    
+    return {
+        type: 'audio',
+        data: audioData
+    };
+}
+
+
+// --- Public Orchestrator Functions ---
+
 export async function runArchiveOrgAnalysis(
     url: string,
     updateProgress: (message: string) => void,
     analysisMode: AnalysisMode,
 ): Promise<AnalysisPipelineResult | { type: 'text_content', data: string }> {
-    updateProgress(`Step 1/1: Analyzing Internet Archive page and fetching content...`);
+    updateProgress(`Analyzing Internet Archive page and fetching content...`);
     const result = await ArchiveOrgAgent.processUrl(url);
 
     if (result.type === 'text') {
@@ -20,40 +69,19 @@ export async function runArchiveOrgAnalysis(
     } 
     
     // It's audio/video with a transcript
-    const initialAnalysis = result.data as Pick<AudioAnalysisResult, 'transcript' | 'thematicSegments' | 'sentimentAnalysis'>;
-    const transcriptText = initialAnalysis.transcript!.map(t => `${t.speaker}: ${t.text}`).join('\n');
-    let factChecks = [];
-
+    const initialAnalysis = result.data;
     const totalSteps = analysisMode === 'express' ? 2 : 4;
     updateProgress(`Step 1/${totalSteps}: Fetched transcript from Internet Archive.`);
-
-    if (analysisMode === 'standard') {
-        updateProgress(`Step 2/${totalSteps}: Extracting verifiable claims from transcript...`);
-        const claims = await SynthesizerAgent.extractClaimsFromTranscript(transcriptText);
-
-        if (claims.length > 0) {
-            updateProgress(`Step 3/${totalSteps}: Fact-checking ${claims.length} claims...`);
-            factChecks = await FactCheckAgent.verifyClaims(claims);
-        } else {
-             updateProgress(`Step 3/${totalSteps}: No verifiable claims found.`);
-        }
-    } else {
-        updateProgress(`Step 2/${totalSteps}: Skipping fact-checking in Express mode.`);
-    }
     
-    updateProgress(`Step ${totalSteps}/${totalSteps}: Finalizing dashboard...`);
-
-    return {
-        type: 'audio',
-        data: {
-            type: 'audio',
-            transcript: initialAnalysis.transcript!,
-            thematicSegments: initialAnalysis.thematicSegments,
-            sentimentAnalysis: initialAnalysis.sentimentAnalysis,
-            factChecks: factChecks.length > 0 ? factChecks : undefined,
-            archiveOrgUrl: url,
-        }
-    };
+    return await _runFactCheckingAndAssembleAudioResult(
+        initialAnalysis,
+        url,
+        'archiveOrgUrl',
+        updateProgress,
+        analysisMode,
+        2,
+        totalSteps
+    );
 }
 
 
@@ -71,36 +99,15 @@ export async function runTedTalkAnalysis(
         throw new Error("Could not retrieve a valid transcript for the TED Talk.");
     }
 
-    const transcriptText = initialAnalysis.transcript.map(t => `${t.speaker}: ${t.text}`).join('\n');
-    let factChecks = [];
-
-    if (analysisMode === 'standard') {
-        updateProgress(`Step 2/${totalSteps}: Extracting verifiable claims from transcript...`);
-        const claims = await SynthesizerAgent.extractClaimsFromTranscript(transcriptText);
-
-        if (claims.length > 0) {
-            updateProgress(`Step 3/${totalSteps}: Fact-checking ${claims.length} claims with Google Search...`);
-            factChecks = await FactCheckAgent.verifyClaims(claims);
-        } else {
-             updateProgress(`Step 3/${totalSteps}: No verifiable claims found to check.`);
-        }
-    } else {
-        updateProgress(`Step 2/${totalSteps}: Skipping fact-checking in Express mode.`);
-    }
-    
-    updateProgress(`Step ${totalSteps}/${totalSteps}: Finalizing dashboard...`);
-
-    return {
-        type: 'audio',
-        data: {
-            type: 'audio',
-            transcript: initialAnalysis.transcript,
-            thematicSegments: initialAnalysis.thematicSegments,
-            sentimentAnalysis: initialAnalysis.sentimentAnalysis,
-            factChecks: factChecks.length > 0 ? factChecks : undefined,
-            tedTalkUrl: url,
-        }
-    };
+    return await _runFactCheckingAndAssembleAudioResult(
+        initialAnalysis,
+        url,
+        'tedTalkUrl',
+        updateProgress,
+        analysisMode,
+        2,
+        totalSteps
+    );
 }
 
 
@@ -125,36 +132,15 @@ export async function runYoutubeAnalysis(
         };
     }
 
-    const transcriptText = initialAnalysis.transcript.map(t => `${t.speaker}: ${t.text}`).join('\n');
-    let factChecks = [];
-
-    if (analysisMode === 'standard') {
-        updateProgress(`Step 2/${totalSteps}: Extracting verifiable claims from transcript...`);
-        const claims = await SynthesizerAgent.extractClaimsFromTranscript(transcriptText);
-
-        if (claims.length > 0) {
-            updateProgress(`Step 3/${totalSteps}: Fact-checking ${claims.length} claims with Google Search...`);
-            factChecks = await FactCheckAgent.verifyClaims(claims);
-        } else {
-             updateProgress(`Step 3/${totalSteps}: No verifiable claims found to check.`);
-        }
-    } else {
-        updateProgress(`Step 2/${totalSteps}: Skipping fact-checking in Express mode.`);
-    }
-    
-    updateProgress(`Step ${totalSteps}/${totalSteps}: Finalizing dashboard...`);
-
-    return {
-        type: 'audio',
-        data: {
-            type: 'audio',
-            transcript: initialAnalysis.transcript,
-            thematicSegments: initialAnalysis.thematicSegments,
-            sentimentAnalysis: initialAnalysis.sentimentAnalysis,
-            factChecks: factChecks.length > 0 ? factChecks : undefined,
-            youtubeUrl: url,
-        }
-    };
+    return await _runFactCheckingAndAssembleAudioResult(
+        initialAnalysis,
+        url,
+        'youtubeUrl',
+        updateProgress,
+        analysisMode,
+        2,
+        totalSteps
+    );
 }
 
 
@@ -199,7 +185,7 @@ export async function runAnalysisPipeline(
     if (file.type === 'text/plain') {
         throw new Error("Internal error: runAnalysisPipeline should not be called for text files. Use runTextAnalysis instead.");
     } else if (file.type.startsWith('audio/')) {
-        const totalSteps = analysisMode === 'express' ? 3 : 4;
+        const totalSteps = analysisMode === 'express' ? 3 : 5;
 
         updateProgress(`Step 1/${totalSteps}: Transcribing audio... (this may take a moment)`);
         const transcriptResult = await TranscriptionAgent.transcribeAudio(file);
@@ -230,7 +216,8 @@ export async function runAnalysisPipeline(
         } else {
             updateProgress(`Step 3/${totalSteps}: Skipping fact-checking in Express mode.`);
         }
-
+        
+        updateProgress(`Step ${totalSteps}/${totalSteps}: Finalizing dashboard...`);
 
         return {
             type: 'audio',

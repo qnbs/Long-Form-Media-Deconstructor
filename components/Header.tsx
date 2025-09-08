@@ -1,6 +1,4 @@
-
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrainCircuitIcon, HelpIcon, PlusIcon, SettingsIcon, ArchiveBoxIcon, SearchIcon } from './IconComponents';
 import { useCommandPalette } from '../hooks/useCommandPalette';
 
@@ -13,6 +11,22 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onShowHelp, onShowSettings, onShowArchive, onNewAnalysis }) => {
     const { openPalette } = useCommandPalette();
+    const [appName, setAppName] = useState('Long-Form Media Deconstructor');
+
+    useEffect(() => {
+        // Fetch metadata.json to dynamically set the app name.
+        // This avoids module resolution issues in certain environments.
+        fetch('./metadata.json')
+            .then(response => response.json())
+            .then(data => {
+                if (data.name) {
+                    setAppName(data.name);
+                }
+            })
+            .catch(error => {
+                console.error("Could not load metadata.json, using default app name.", error);
+            });
+    }, []);
     
     return (
         <>
@@ -72,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({ onShowHelp, onShowSettings, onSh
                     {/* Right side title */}
                     <div className="flex items-center gap-3">
                         <h1 className="hidden sm:block text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-500 dark:from-sky-400 dark:to-indigo-500">
-                            Long-Form Media Deconstructor
+                            {appName}
                         </h1>
                         <BrainCircuitIcon />
                     </div>
