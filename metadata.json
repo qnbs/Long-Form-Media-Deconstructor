@@ -1,0 +1,5 @@
+{
+  "name": "Long-Form Media Deconstructor",
+  "description": "An AI-powered progressive web app to analyze and deconstruct long-form media, starting with scientific publications, into structured, queryable knowledge. This MVP focuses on synthesizing academic texts into argument maps, summaries, and glossaries.",
+  "requestFramePermissions": []
+}
